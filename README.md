@@ -1,137 +1,204 @@
-# Azure DevOps CI/CD Lab – AKS + Terraform + NodeJS
+# Azure DevOps CI/CD Pipelines Lab  
+A fully automated CI/CD lab showcasing **Terraform + AKS + ACR + Azure Pipelines + Kubernetes deployments**, including Makefile automation and a sample Node.js application.
 
-This repository is a practical, end-to-end Azure DevOps project demonstrating:
-
-- Infrastructure provisioning using **Terraform**
-- Containerization using **Docker**
-- CI/CD pipelines using **Azure DevOps Pipelines**
-- Application deployment to **Azure Kubernetes Service (AKS)**
-
-A complete DevOps flow from **code → build → deploy → AKS**.
+This repository is designed as a complete end-to-end Azure DevOps practice environment and is part of my professional DevOps portfolio.
 
 ---
 
-## 📁 Repository Structure
+## 🚀 Tech Stack  
+- **Terraform (AKS Automation)**
+- **Azure Container Registry (ACR)**
+- **Azure Kubernetes Service (AKS)**
+- **Azure DevOps Pipelines (CI + CD)**
+- **Docker**
+- **Kubernetes (k8s)**
+- **Node.js App**
+- **Makefile Automation**
+
+---
+
+## 📂 Folder Structure
 
 ```
-azure-devops-cicd-lab/
- ├── app/
- │   ├── server.js
- │   ├── package.json
- │   └── node-app.yaml
- ├── pipelines/
- │   ├── nodeapp-ci.yaml
- │   └── nodeapp-cd.yaml
- ├── terraform/
- │   ├── provider.tf
- │   ├── aks_main.tf
- │   ├── variables.tf
- │   └── terraform.tfvars
- └── README.md
-```
-
----
-
-## 🚀 What This Project Demonstrates
-
-### **1. CI Pipeline (Build + Docker Image Push)**  
-- Installs Node dependencies  
-- Runs tests (placeholder)  
-- Builds Docker image  
-- Pushes image to **Azure Container Registry (ACR)**
-
-File: `pipelines/nodeapp-ci.yaml`
-
----
-
-### **2. CD Pipeline (Deploy to AKS)**  
-- Fetches latest image from ACR  
-- Applies Kubernetes manifest (`node-app.yaml`)  
-- Deploys the app via `kubectl apply`  
-- Exposure via LoadBalancer service
-
-File: `pipelines/nodeapp-cd.yaml`
-
----
-
-### **3. Terraform AKS Infrastructure**
-
-Terraform automates:
-- Azure Resource Group creation  
-- Azure Kubernetes Service (AKS) cluster  
-- Node pool configuration  
-- Networking settings  
-
-Files under `/terraform`
-
----
-
-### **4. NodeJS Sample Application**
-
-A simple HTTP server used to test CI/CD:
-
-```
-http://<public-ip> → "Hello from NodeJS App deployed on AKS using Terraform + Azure DevOps"
-```
-
-Files under `/app`
-
----
-
-## 🛠️ Prerequisites
-
-- Azure Subscription  
-- Azure DevOps Organization  
-- Azure Container Registry (ACR)  
-- AKS permissions (Owner/Contributor)  
-- Terraform installed  
-- Docker installed  
-
----
-
-## 🌐 Deployment Flow (High-Level)
-
-1️⃣ Developer pushes code to GitHub  
-2️⃣ CI pipeline builds and pushes Docker image → ACR  
-3️⃣ CD pipeline deploys to AKS  
-4️⃣ User accesses app via LoadBalancer external IP  
-
----
-
-## 📦 Docker Build Commands (Local)
-
-```
-docker build -t nodeapp:v1 .
-docker run -p 3000:3000 nodeapp:v1
+AZURE-DEVOPS-CI-CD-PIPELINES-LAB/
+│
+├── app/
+│   ├── server.js
+│   ├── package.json
+│   └── Dockerfile
+│
+├── architecture/
+│   └── devops-flow.md
+│
+├── Makefile
+│
+├── pipelines/
+│   ├── azure-pipelines-ci.yaml
+│   └── azure-pipelines-cd.yaml
+│
+├── terraform/
+│   ├── aks_main.tf
+│   ├── provider.tf
+│   ├── variables.tf
+│   └── terraform.tfvars
+│
+└── README.md
 ```
 
 ---
 
-## 🧪 Test the Application Locally
+## 🏗️ Architecture Overview  
+See `architecture/devops-flow.md` for the complete diagram + workflow.
+
+### 🔄 High-Level DevOps Flow
+1. Developer pushes code → GitHub  
+2. **CI Pipeline**  
+   - Install Node packages  
+   - Run unit tests  
+   - Build Docker image  
+   - Push image to **ACR → myacrregistry**  
+3. **CD Pipeline**  
+   - Pull latest image  
+   - Deploy to AKS  
+   - Apply Kubernetes manifests  
+4. App becomes live on AKS LoadBalancer  
+
+---
+
+# 🌐 Application — Node.js Web App
+
+### `server.js`
+```javascript
+const http = require("http");
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("Hello from Azure DevOps CI/CD on AKS!");
+});
+
+server.listen(3000, () => {
+  console.log("Server running on port 3000");
+});
+```
+
+### `package.json`
+```json
+{
+  "name": "ci-cd-node-app",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
+```
+
+### `Dockerfile`
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package.json .
+RUN npm install
+COPY . .
+EXPOSE 3000
+CMD ["npm", "start"]
+```
+
+---
+
+# ⚙️ Makefile — Automation Commands
+
+```makefile
+APP_NAME=nodeapp
+ACR_NAME=myacrregistry
+IMAGE_TAG=v1
+
+docker-build:
+	docker build -t $(ACR_NAME).azurecr.io/$(APP_NAME):$(IMAGE_TAG) ./app
+
+docker-login:
+	az acr login --name $(ACR_NAME)
+
+docker-push:
+	docker push $(ACR_NAME).azurecr.io/$(APP_NAME):$(IMAGE_TAG)
+
+tf-init:
+	cd terraform && terraform init
+
+tf-apply:
+	cd terraform && terraform apply -auto-approve
+
+tf-destroy:
+	cd terraform && terraform destroy -auto-approve
+```
+
+---
+
+# 🌍 Terraform — AKS Deployment
+
+### `aks_main.tf`
+Creates AKS cluster with node pool, RBAC, and ACR integration.
+
+### `provider.tf`
+AzureRM provider configuration.
+
+### `variables.tf`
+Contains parameters for region, cluster name, node count, VM size, etc.
+
+### `terraform.tfvars`
+```
+resource_group_name = "devops-lab-rg"
+cluster_name        = "devops-aks-cluster"
+location            = "eastus"
+dns_prefix          = "devopsdemo"
+```
+
+---
+
+# ▶️ Run Terraform
 
 ```
-npm install
-npm start
+make tf-init
+make tf-apply
 ```
 
----
-
-## 🤝 Contribution
-
-Feel free to fork and experiment with:
-- Helm  
-- Kustomize  
-- Istio  
-- Multi-stage Docker builds  
-- Azure Key Vault integration
+This will:
+✔ Create Resource Group  
+✔ Create AKS Cluster  
+✔ Integrate AKS ↔ ACR  
+✔ Output kubeconfig  
 
 ---
 
-## 📜 License
-MIT License – Free to use, modify, experiment.
+# 🔧 Azure DevOps — CI Pipeline (azure-pipelines-ci.yaml)
+
+- Install Node dependencies  
+- Run tests  
+- Docker build  
+- Docker push → ACR (`myacrregistry`)  
+- Triggered on every push to main  
 
 ---
 
-## ✨ Author
-**Sairam Potula – Azure DevOps Engineer | Kubernetes | CI/CD | Terraform**
+# 🚀 Azure DevOps — CD Pipeline (azure-pipelines-cd.yaml)
 
+- Pull latest Docker image  
+- Replace image tag in k8s manifest  
+- Deploy to AKS using kubectl  
+- Apply deployment + service manifests  
+
+---
+
+# 🌟 End-to-End Deployment Flow
+
+1. `git push`  
+2. **CI pipeline** builds + pushes Docker image  
+3. **CD pipeline** deploys latest image to AKS  
+4. App becomes available at:
+
+### 👉 http://<AKS_LoadBalancer_IP>:3000
+
+---
+
+# ✅ Conclusion  
+This lab demonstrates a **complete, production-style Azure DevOps CI/CD system** using Terraform, AKS, ACR, Docker, and Kubernetes — fully automated and cloud-ready.
