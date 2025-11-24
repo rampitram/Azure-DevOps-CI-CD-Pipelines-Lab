@@ -202,3 +202,7 @@ This will:
 
 # ✅ Conclusion  
 This lab demonstrates a **complete, production-style Azure DevOps CI/CD system** using Terraform, AKS, ACR, Docker, and Kubernetes — fully automated and cloud-ready.
+
+
+## ✨ Author
+**Ram Rocky – Azure DevOps Engineer | Kubernetes | CI/CD | Terraform**
