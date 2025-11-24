@@ -205,4 +205,4 @@ This lab demonstrates a **complete, production-style Azure DevOps CI/CD system**
 
 
 ## ✨ Author
-**Ram Rocky – Azure DevOps Engineer | Kubernetes | CI/CD | Terraform**
+**Sairam Potula – Azure DevOps Engineer | Kubernetes | CI/CD | Terraform**
